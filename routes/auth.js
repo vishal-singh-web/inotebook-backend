@@ -6,6 +6,7 @@ import pkg from 'jsonwebtoken';
 const { sign } = pkg;
 import fetchuser from '../middleware/fetchuser.js';
 const JWT_SIGN = process.env.JWT_SIGN;
+import User from '../models/Users.js';
 import dotenv from 'dotenv';
 dotenv.config(); 
 
@@ -28,14 +29,14 @@ router.post('/signup', validate([
     if (!errors.isEmpty()) {
       return res.status(400).json({"success":false, errors: errors.array() });
     }
-    const auser = await findOne({"success":false, email: req.body.email });
+    const auser = await User.findOne({"success":false, email: req.body.email });
     if (auser) {
       return res.status(400).json({ "success":false,error: 'A user with this email already exist.' })
     }
     const salt = await genSalt(10);
     const secpass = await hash(req.body.password, salt);
 
-    const user = await create({
+    const user = await User.create({
       name: req.body.name,
       email: req.body.email,
       password: secpass
@@ -59,7 +60,7 @@ router.post('/login', validate([
 ]), async (req, res) => {
   try {
     const { email, password } = req.body;
-    const auser = await findOne({ email });
+    const auser = await User.findOne({ email });
     if (!auser) {
       return res.status(400).json({"success":false, error: 'Please enter correct credentials.' })
     }
@@ -85,7 +86,7 @@ router.post('/login', validate([
 router.post('/getuser', fetchuser, async (req, res) => {
   try {
     const userid = req.user.id;
-    const user = await findById(userid).select('-password');
+    const user = await User.findById(userid).select('-password');
     res.send(user);
   } catch (error) {
     console.error(error);

@@ -9,7 +9,11 @@ const app = express()
 
 app.use(json())
 app.use(cors());
-app.options('*', cors());
+app.use(cors({
+  origin: 'http://localhost:3000', // or ['http://localhost:3000', ...] for more
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true,
+}));
 
 
 import authRoutes from './routes/auth.js';
